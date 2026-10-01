@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}API &middot; QuantumHub{% endblock %}
+
+{% block content %}
+<h1>JSON API</h1>
+<p class="lede">
+  Every endpoint returns JSON. Errors come back as
+  <code>{"error": "..."}</code> with a 4xx or 5xx status.
+</p>
+
+<section class="panel">
+  <h2>Endpoints</h2>
+  <table class="data-table">
+    <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+    <tbody>
+      {% for entry in endpoints %}
+      <tr>
+        <td><code>{{ entry.method }}</code></td>
+        <td><code>{{ entry.path }}</code></td>
+        <td>{{ entry.description }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>Example: filter papers by organisation type</h2>
+  <pre class="code-block">curl "http://127.0.0.1:{{ config.QH_SETTINGS.port }}/api/papers?org_type=company&amp;per_page=2"</pre>
+</section>
+
+<section class="panel">
+  <h2>Example: search and inspect one record</h2>
+  <pre class="code-block">curl "http://127.0.0.1:{{ config.QH_SETTINGS.port }}/api/papers?q=surface+code"
+curl "http://127.0.0.1:{{ config.QH_SETTINGS.port }}/api/papers/p007"</pre>
+</section>
+
+<section class="panel">
+  <h2>Example: run an experiment</h2>
+  <pre class="code-block">curl -X POST "http://127.0.0.1:{{ config.QH_SETTINGS.port }}/lab/run" \
+  -H "Content-Type: application/json" \
+  -d '{"algorithm":"grover","parameters":{"qubits":4,"marked":5}}'</pre>
+</section>
+{% endblock %}

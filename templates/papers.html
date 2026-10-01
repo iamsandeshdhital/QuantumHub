@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Papers &middot; QuantumHub{% endblock %}
+
+{% block content %}
+<h1>Papers</h1>
+<p class="lede">{{ total }} matching {{ 'paper' if total == 1 else 'papers' }}.</p>
+
+<form class="filters" method="get" action="{{ url_for('papers_page') }}">
+  <label>
+    <span>Search</span>
+    <input type="search" name="q" value="{{ filters.query or '' }}" placeholder="title, author, tag">
+  </label>
+
+  <label>
+    <span>Organisation type</span>
+    <select name="org_type">
+      <option value="">Any</option>
+      {% for value in org_types %}
+      <option value="{{ value }}" {% if filters.org_type == value %}selected{% endif %}>
+        {{ value }} ({{ facets['org_type']['counts'][value] }})
+      </option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>
+    <span>Difficulty</span>
+    <select name="difficulty">
+      <option value="">Any</option>
+      {% for value in difficulties %}
+      <option value="{{ value }}" {% if filters.difficulty == value %}selected{% endif %}>
+        {{ value }} ({{ facets['difficulty']['counts'][value] }})
+      </option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>
+    <span>Algorithm family</span>
+    <select name="algorithm_family">
+      <option value="">Any</option>
+      {% for value in facets['algorithm_family']['values'] %}
+      <option value="{{ value }}" {% if filters.algorithm_family == value %}selected{% endif %}>
+        {{ value }} ({{ facets['algorithm_family']['counts'][value] }})
+      </option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>
+    <span>Hardware</span>
+    <select name="hardware_platform">
+      <option value="">Any</option>
+      {% for value in facets['hardware_platform']['values'] %}
+      <option value="{{ value }}" {% if filters.hardware_platform == value %}selected{% endif %}>
+        {{ value }} ({{ facets['hardware_platform']['counts'][value] }})
+      </option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>
+    <span>Tag</span>
+    <select name="tag">
+      <option value="">Any</option>
+      {% for value in facets['tags']['values'] %}
+      <option value="{{ value }}" {% if filters.tag == value %}selected{% endif %}>
+        {{ value }} ({{ facets['tags']['counts'][value] }})
+      </option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>
+    <span>Sort</span>
+    <select name="sort">
+      <option value="year" {% if request.args.get('sort') == 'year' %}selected{% endif %}>Year</option>
+      <option value="title" {% if request.args.get('sort') == 'title' %}selected{% endif %}>Title</option>
+      <option value="organisation" {% if request.args.get('sort') == 'organisation' %}selected{% endif %}>Organisation</option>
+      <option value="id" {% if request.args.get('sort') == 'id' %}selected{% endif %}>Id</option>
+    </select>
+  </label>
+
+  <label>
+    <span>Order</span>
+    <select name="order">
+      <option value="desc" {% if request.args.get('order', 'desc') == 'desc' %}selected{% endif %}>Descending</option>
+      <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Ascending</option>
+    </select>
+  </label>
+
+  <div class="filter-actions">
+    <button type="submit" class="button button-primary">Apply</button>
+    <a class="button" href="{{ url_for('papers_page') }}">Reset</a>
+  </div>
+</form>
+
+{% if papers %}
+<ul class="paper-list">
+  {% for paper in papers %}
+  <li class="paper-row">
+    <div class="paper-row-main">
+      <a class="paper-title" href="{{ url_for('paper_detail', paper_id=paper.id) }}">{{ paper.title }}</a>
+      <p class="paper-authors">{{ paper.author_summary }}</p>
+      <p class="paper-meta">
+        <span class="badge badge-{{ paper.org_type }}">{{ paper.org_type }}</span>
+        <span class="badge">{{ paper.difficulty }}</span>
+        <span class="paper-org">{{ paper.organisation }}</span>
+        <span class="paper-venue">{{ paper.venue }} {{ paper.year }}</span>
+      </p>
+      <p class="paper-abstract">{{ paper.abstract[:260] }}{% if paper.abstract|length > 260 %}...{% endif %}</p>
+      <p class="tag-row">
+        {% for tag in paper.tags %}<span class="tag">{{ tag }}</span>{% endfor %}
+      </p>
+    </div>
+    <div class="paper-row-side">
+      {% if paper.link %}<a class="button button-small" href="{{ paper.link }}" rel="noopener noreferrer" target="_blank">Source</a>{% endif %}
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
+<nav class="pagination">
+  {% if pagination.has_prev %}
+  <a class="button button-small" href="{{ url_for('papers_page', page=pagination.page - 1, **request.args.to_dict()) }}">Previous</a>
+  {% endif %}
+  <span class="pagination-status">Page {{ pagination.page }} of {{ pagination.total_pages }} &middot; {{ pagination.total_items }} results</span>
+  {% if pagination.has_next %}
+  <a class="button button-small" href="{{ url_for('papers_page', page=pagination.page + 1, **request.args.to_dict()) }}">Next</a>
+  {% endif %}
+</nav>
+{% else %}
+<p class="empty">No papers match those filters. <a href="{{ url_for('papers_page') }}">Reset the filters</a>.</p>
+{% endif %}
+{% endblock %}

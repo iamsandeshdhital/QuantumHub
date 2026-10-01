@@ -1,0 +1,46 @@
+{% macro nav_link(endpoint, label) -%}
+  <a class="nav-link {% if request.path == endpoint %}is-active{% endif %}" href="{{ url_for(endpoint) }}">{{ label }}</a>
+{%- endmacro %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}QuantumHub{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{{ url_for('index') }}">
+      <span class="brand-mark">QH</span>
+      <span class="brand-text">QuantumHub</span>
+    </a>
+    <nav class="site-nav">
+      {{ nav_link('index', 'Home') }}
+      {{ nav_link('papers_page', 'Papers') }}
+      {{ nav_link('projects_page', 'Projects') }}
+      {{ nav_link('lab', 'Lab') }}
+      {{ nav_link('analytics_page', 'Analytics') }}
+      {{ nav_link('api_docs', 'API') }}
+      {{ nav_link('about', 'About') }}
+    </nav>
+  </header>
+
+  <main class="site-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      QuantumHub is an independent teaching and research project. It is not
+      affiliated with any of the organisations whose work it indexes.
+    </p>
+    <p class="footer-meta">
+      Built by Sandesh Dhital &middot; <a href="{{ url_for('api_docs') }}">API</a>
+    </p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ project.title }} &middot; QuantumHub{% endblock %}
+
+{% block content %}
+<article class="detail">
+  <p class="detail-crumb"><a href="{{ url_for('projects_page') }}">Projects</a> / {{ project.id }}</p>
+  <h1>{{ project.title }}</h1>
+
+  <p class="detail-meta">
+    <span class="badge">{{ project.category }}</span>
+    <span class="badge">{{ project.difficulty }}</span>
+    {% if project.implemented %}
+    <span class="badge badge-local">in this repo</span>
+    {% else %}
+    <span class="badge badge-remote">external</span>
+    {% endif %}
+  </p>
+
+  <section>
+    <h2>What it is</h2>
+    <p>{{ project.description }}</p>
+  </section>
+
+  <section>
+    <h2>Why it is hard</h2>
+    <p>{{ project.why_hard }}</p>
+  </section>
+
+  {% if project.correctness_evidence %}
+  <section>
+    <h2>How it is verified</h2>
+    <p>{{ project.correctness_evidence }}</p>
+  </section>
+  {% endif %}
+
+  <section>
+    <h2>Record</h2>
+    <dl class="definition-grid">
+      <dt>Category</dt><dd>{{ project.category }}</dd>
+      <dt>Difficulty</dt><dd>{{ project.difficulty }}</dd>
+      <dt>Implemented here</dt><dd>{{ 'yes' if project.implemented else 'no, external reference' }}</dd>
+      {% if project.module %}<dt>Module</dt><dd><code>{{ project.module }}</code></dd>{% endif %}
+      {% if project.entry_point %}<dt>Entry point</dt><dd><code>{{ project.entry_point }}</code></dd>{% endif %}
+      {% if project.test_module %}<dt>Tests</dt><dd><code>{{ project.test_module }}</code></dd>{% endif %}
+      {% if project.url %}<dt>Upstream</dt><dd><a href="{{ project.url }}" rel="noopener noreferrer" target="_blank">{{ project.url }}</a></dd>{% endif %}
+      {% if project.organisation %}<dt>Organisation</dt><dd>{{ project.organisation }}</dd>{% endif %}
+    </dl>
+  </section>
+
+  <section>
+    <h2>Tags</h2>
+    <p class="tag-row">
+      {% for tag in project.tags %}<span class="tag">{{ tag }}</span>{% endfor %}
+    </p>
+  </section>
+
+  {% if project.implemented %}
+  <p><a class="button button-primary" href="{{ url_for('lab') }}">Run an experiment in the lab</a></p>
+  {% endif %}
+</article>
+{% endblock %}

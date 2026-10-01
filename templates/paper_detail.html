@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ paper.title }} &middot; QuantumHub{% endblock %}
+
+{% block content %}
+<article class="detail">
+  <p class="detail-crumb"><a href="{{ url_for('papers_page') }}">Papers</a> / {{ paper.id }}</p>
+  <h1>{{ paper.title }}</h1>
+
+  <p class="detail-meta">
+    <span class="badge badge-{{ paper.org_type }}">{{ paper.org_type }}</span>
+    <span class="badge">{{ paper.difficulty }}</span>
+    <span>{{ paper.organisation }}</span>
+    <span>{{ paper.venue }}, {{ paper.year }}</span>
+  </p>
+
+  <section>
+    <h2>Abstract</h2>
+    <p class="abstract">{{ paper.abstract }}</p>
+  </section>
+
+  <section>
+    <h2>Authors</h2>
+    <ul class="plain-list">
+      {% for author in paper.authors %}<li>{{ author }}</li>{% endfor %}
+    </ul>
+    {% if paper.authors_truncated %}
+    <p class="note">The published author list is longer than the one recorded here. Check the source for the complete list.</p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Record</h2>
+    <dl class="definition-grid">
+      <dt>Organisation</dt><dd>{{ paper.organisation }}</dd>
+      <dt>Organisation type</dt><dd>{{ paper.org_type }}</dd>
+      <dt>Venue</dt><dd>{{ paper.venue }}</dd>
+      <dt>Year</dt><dd>{{ paper.year }}</dd>
+      <dt>DOI</dt><dd>{% if paper.doi %}<a href="https://doi.org/{{ paper.doi }}" rel="noopener noreferrer" target="_blank">{{ paper.doi }}</a>{% else %}not recorded{% endif %}</dd>
+      <dt>arXiv</dt><dd>{% if paper.arxiv %}<a href="https://arxiv.org/abs/{{ paper.arxiv }}" rel="noopener noreferrer" target="_blank">{{ paper.arxiv }}</a>{% else %}not recorded{% endif %}</dd>
+      <dt>Algorithm family</dt><dd>{{ paper.algorithm_family }}</dd>
+      <dt>Hardware platform</dt><dd>{{ paper.hardware_platform }}</dd>
+      <dt>Difficulty</dt><dd>{{ paper.difficulty }} <span class="note">(editorial classification)</span></dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2>Tags</h2>
+    <p class="tag-row">
+      {% for tag in paper.tags %}
+      <a class="tag tag-link" href="{{ url_for('papers_page', tag=tag) }}">{{ tag }}</a>
+      {% endfor %}
+    </p>
+  </section>
+
+  {% if paper.link %}
+  <p><a class="button button-primary" href="{{ paper.link }}" rel="noopener noreferrer" target="_blank">Read the published version</a></p>
+  {% endif %}
+</article>
+
+{% if related %}
+<section class="panel">
+  <h2>Related papers</h2>
+  <ul class="card-list">
+    {% for item in related %}
+    <li class="card">
+      <a class="card-title" href="{{ url_for('paper_detail', paper_id=item.id) }}">{{ item.title }}</a>
+      <p class="card-meta">{{ item.organisation }} &middot; {{ item.year }}</p>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

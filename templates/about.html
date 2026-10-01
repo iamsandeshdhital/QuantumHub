@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}About &middot; QuantumHub{% endblock %}
+
+{% block content %}
+<h1>About QuantumHub</h1>
+
+<section class="panel">
+  <h2>What this is</h2>
+  <p>
+    QuantumHub pairs an index of quantum computing literature with a working
+    implementation you can read. The index covers papers from universities,
+    companies and independent groups. The implementation is a pure-Python
+    statevector simulator plus ten algorithms, each verified against an
+    independently computable ground truth.
+  </p>
+</section>
+
+<section class="panel">
+  <h2>How the verification works</h2>
+  <p>
+    Each algorithm is checked against something the test suite computes
+    independently, not against a recorded expected output:
+  </p>
+  <ul>
+    <li>The quantum Fourier transform is compared element by element with the dense discrete Fourier transform matrix.</li>
+    <li>Grover search and QAOA are compared with brute-force enumeration over all assignments.</li>
+    <li>The variational eigensolver is compared with the eigenvalues of the Hamiltonian obtained by direct diagonalisation.</li>
+    <li>Grover search is compared with the analytic bound of about <code>pi/4 * sqrt(N)</code> iterations.</li>
+    <li>Sub-register marginals are compared with a brute-force partial trace over every qubit subset.</li>
+    <li>Simon's algorithm is checked by first proving the generated oracle is exactly two-to-one with the intended period.</li>
+  </ul>
+</section>
+
+<section class="panel">
+  <h2>About the data</h2>
+  <p>
+    The dataset is a small hand-curated teaching sample, not a complete
+    bibliography. Bibliographic fields were compiled from the published record
+    and should be checked against the linked DOI or arXiv identifier before you
+    cite them. Citation counts are omitted because they change over time and
+    would need a live source to report accurately. The
+    <code>difficulty</code> and <code>hardware_platform</code> fields are
+    editorial classifications, not claims made by the papers.
+  </p>
+  <p>
+    The loader validates the dataset at startup and refuses to start on a
+    malformed record, a duplicate id, an unknown organisation type, a bad DOI,
+    or an author entry that still looks like an unfilled placeholder.
+  </p>
+</section>
+
+<section class="panel">
+  <h2>Scope and honesty notes</h2>
+  <ul>
+    <li>
+      Dense statevector simulation uses memory that grows as 2 to the power of n,
+      so the simulator refuses to allocate a register wider than 24 qubits. That
+      is a memory limit, not a claim about what quantum hardware can do.
+    </li>
+    <li>
+      Shor's order finding is computed classically here because exact
+      simulation makes the quantum step unnecessary at these sizes. The
+      post-processing, which is the part that runs on hardware, is implemented
+      and tested.
+    </li>
+    <li>
+      The project indexes other people's work. It is not affiliated with any of
+      the organisations it references.
+    </li>
+  </ul>
+</section>
+{% endblock %}

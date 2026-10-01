@@ -1,0 +1,84 @@
+[project]
+name = "quantumhub"
+version = "1.0.0"
+description = "A quantum computing research index with a tested pure-Python simulator and algorithm implementations"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Sandesh Dhital" }]
+keywords = [
+    "quantum-computing",
+    "statevector-simulator",
+    "quantum-algorithms",
+    "qft",
+    "grover",
+    "shor",
+    "qaoa",
+    "vqe",
+    "education",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = ["flask>=3.0,<4.0", "numpy>=1.26,<3.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0,<9.0", "pytest-cov>=5.0,<7.0", "ruff>=0.4,<1.0"]
+
+[project.urls]
+Homepage = "https://github.com/iamsandeshdhital/QuantumHub"
+Issues = "https://github.com/iamsandeshdhital/QuantumHub/issues"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["quantumhub"]
+
+[tool.setuptools.package-data]
+quantumhub = ["py.typed"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+filterwarnings = ["error::DeprecationWarning:quantumhub.*"]
+
+[tool.coverage.run]
+branch = true
+source = ["quantumhub", "app", "config"]
+omit = ["tests/*", "verify_quantum.py", "verify_requirements.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "RET", "ARG"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test helpers and oracles legitimately take unused arguments, and `zip` over
+# equal-length sequences needs no `strict` flag.
+"tests/*" = ["ARG001", "ARG002", "B018", "B905", "N803", "B007"]
+"quantumhub/algorithms.py" = ["ARG001", "B905", "N803", "N806"]
+"app.py" = ["ARG001", "N803"]

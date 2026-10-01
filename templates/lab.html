@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Lab &middot; QuantumHub{% endblock %}
+
+{% block content %}
+<h1>Lab</h1>
+<p class="lede">
+  Every experiment below runs the same simulator and algorithms the test suite
+  exercises, so a passing run here is the same code path that CI checks.
+</p>
+
+<form class="lab-form" id="lab-form">
+  <label>
+    <span>Experiment</span>
+    <select id="algorithm" name="algorithm">
+      {% for entry in algorithms %}
+      <option value="{{ entry.key }}" data-description="{{ entry.description }}">{{ entry.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <div id="parameters"></div>
+
+  <div class="filter-actions">
+    <button type="submit" class="button button-primary">Run</button>
+  </div>
+</form>
+
+<p class="note" id="algorithm-description"></p>
+
+<div id="status" class="lab-status" role="status"></div>
+<pre id="result" class="lab-result" aria-live="polite"></pre>
+
+<section class="panel">
+  <h2>What each experiment demonstrates</h2>
+  <dl class="definition-grid">
+    {% for entry in algorithms %}
+    <dt>{{ entry.name }}</dt><dd>{{ entry.description }}</dd>
+    {% endfor %}
+  </dl>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const CATALOGUE = [
+    {% for entry in algorithms %}
+    {
+      key: {{ entry.key | tojson }},
+      name: {{ entry.name | tojson }},
+      description: {{ entry.description | tojson }},
+      parameters: {{ entry.parameters | tojson }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ];
+
+  const MAX_QUBITS = {{ max_qubits }};
+
+  const form = document.getElementById('lab-form');
+  const algorithmSelect = document.getElementById('algorithm');
+  const parameterHost = document.getElementById('parameters');
+  const statusEl = document.getElementById('status');
+  const resultEl = document.getElementById('result');
+  const descriptionEl = document.getElementById('algorithm-description');
+
+  function currentEntry() {
+    return CATALOGUE.find((entry) => entry.key === algorithmSelect.value);
+  }
+
+  function fieldFor(name, spec) {
+    const label = document.createElement('label');
+    const caption = document.createElement('span');
+    caption.textContent = name;
+    label.appendChild(caption);
+
+    let input;
+    if (spec.type === 'choice') {
+      input = document.createElement('select');
+      spec.options.forEach((option) => {
+        const node = document.createElement('option');
+        node.value = option;
+        node.textContent = option;
+        input.appendChild(node);
+      });
+      input.value = spec.default;
+    } else if (spec.type === 'float') {
+      input = document.createElement('input');
+      input.type = 'number';
+      input.step = 'any';
+    } else {
+      input = document.createElement('input');
+      input.type = 'number';
+      input.step = '1';
+    }
+
+    input.name = name;
+    input.value = spec.default;
+    if (spec.min !== undefined) input.min = spec.min;
+    if (spec.max !== undefined) input.max = spec.max;
+    label.appendChild(input);
+    return label;
+  }
+
+  function renderParameters() {
+    const entry = currentEntry();
+    parameterHost.textContent = '';
+    descriptionEl.textContent = entry.description;
+
+    Object.entries(entry.parameters).forEach(([name, spec]) => {
+      if (name === 'marked' || name === 'input' || name === 'secret' || name === 'period') {
+        // Clamp against the currently selected register width.
+        const widthInput = parameterHost.querySelector('input[name="qubits"]');
+        const width = widthInput ? parseInt(widthInput.value, 10) : 4;
+        spec.max = Math.min(spec.max, Math.pow(2, width) - 1);
+      }
+      parameterHost.appendChild(fieldFor(name, spec));
+    });
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    statusEl.textContent = 'Running...';
+    statusEl.className = 'lab-status';
+    resultEl.textContent = '';
+
+    const parameters = {};
+    new FormData(form).forEach((value, key) => {
+      if (key === 'algorithm') return;
+      const spec = (currentEntry().parameters || {})[key];
+      parameters[key] = spec && spec.type === 'float' ? parseFloat(value) : parseInt(value, 10);
+    });
+
+    try {
+      const response = await fetch('{{ url_for("lab_run") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ algorithm: algorithmSelect.value, parameters }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        statusEl.textContent = payload.error || 'Experiment failed';
+        statusEl.className = 'lab-status is-error';
+        return;
+      }
+      statusEl.textContent = 'Done';
+      statusEl.className = 'lab-status is-ok';
+      resultEl.textContent = JSON.stringify(payload, null, 2);
+    } catch (error) {
+      statusEl.textContent = 'Request failed: ' + error.message;
+      statusEl.className = 'lab-status is-error';
+    }
+  });
+
+  algorithmSelect.addEventListener('change', renderParameters);
+  renderParameters();
+</script>
+{% endblock %}

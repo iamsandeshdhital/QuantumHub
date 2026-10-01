@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}QuantumHub{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Quantum computing papers and working implementations</h1>
+  <p class="lede">
+    A curated index of quantum computing research from universities, companies
+    and independent groups, paired with a pure-Python simulator and ten tested
+    algorithm implementations you can read, run and verify.
+  </p>
+  <div class="hero-actions">
+    <a class="button button-primary" href="{{ url_for('papers_page') }}">Browse papers</a>
+    <a class="button" href="{{ url_for('lab') }}">Open the lab</a>
+  </div>
+</section>
+
+<section class="stat-row">
+  <div class="stat-tile">
+    <div class="stat-value">{{ summary.papers.total }}</div>
+    <div class="stat-label">Papers</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-value">{{ summary.organisations | length }}</div>
+    <div class="stat-label">Organisations</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-value">{{ summary.projects.implemented }}</div>
+    <div class="stat-label">Implementations</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-value">{{ summary.projects.external }}</div>
+    <div class="stat-label">Reference projects</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-value">{{ summary.year_span.min }}&ndash;{{ summary.year_span.max }}</div>
+    <div class="stat-label">Year span</div>
+  </div>
+</section>
+
+<section class="split">
+  <div class="panel">
+    <h2>By organisation type</h2>
+    <ul class="bar-list">
+      {% for name, count in summary.papers.by_org_type.items() %}
+      <li>
+        <span class="bar-label">{{ name }}</span>
+        <span class="bar-track"><span class="bar-fill" style="width: {{ (count / summary.papers.total * 100) | round(1) }}%"></span></span>
+        <span class="bar-value">{{ count }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h2>By difficulty</h2>
+    <ul class="bar-list">
+      {% for name, count in summary.papers.by_difficulty.items() %}
+      <li>
+        <span class="bar-label">{{ name }}</span>
+        <span class="bar-track"><span class="bar-fill bar-alt" style="width: {{ (count / summary.papers.total * 100) | round(1) }}%"></span></span>
+        <span class="bar-value">{{ count }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Newest papers</h2>
+  <ul class="card-list">
+    {% for paper in recent_papers %}
+    <li class="card">
+      <a class="card-title" href="{{ url_for('paper_detail', paper_id=paper.id) }}">{{ paper.title }}</a>
+      <p class="card-meta">
+        {{ paper.organisation }} &middot; {{ paper.year }} &middot; {{ paper.venue }}
+      </p>
+      <p class="card-abstract">{{ paper.abstract[:220] }}{% if paper.abstract|length > 220 %}...{% endif %}</p>
+    </li>
+    {% endfor %}
+  </ul>
+  <a class="button" href="{{ url_for('papers_page') }}">See all {{ summary.papers.total }} papers</a>
+</section>
+
+<section class="panel">
+  <h2>Implementations in this repository</h2>
+  <ul class="card-list">
+    {% for project in implemented %}
+    <li class="card">
+      <a class="card-title" href="{{ url_for('project_detail', project_id=project.id) }}">{{ project.title }}</a>
+      <p class="card-meta">{{ project.category }} &middot; {{ project.difficulty }}</p>
+      <p class="card-abstract">{{ project.description[:220] }}{% if project.description|length > 220 %}...{% endif %}</p>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}
