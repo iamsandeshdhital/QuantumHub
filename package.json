@@ -1,0 +1,65 @@
+{
+  "name": "quantumhub",
+  "version": "1.0.0",
+  "description": "Quantum Computing Research Hub - A comprehensive platform for quantum computing papers, projects, and implementations",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "test": "jest --coverage --forceExit",
+    "test:watch": "jest --watch",
+    "test:integration": "jest --testPathPattern=integration --forceExit",
+    "lint": "eslint server/ client/ --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint server/ client/ --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write \"server/**/*.js\" \"client/**/*.{js,jsx,css}\"",
+    "build": "cd client && npm run build",
+    "heroku-postbuild": "cd client && npm install && npm run build"
+  },
+  "keywords": [
+    "quantum-computing",
+    "research",
+    "papers",
+    "algorithms",
+    "qiskit",
+    "quantum-information"
+  ],
+  "author": "QuantumHub Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "express-rate-limit": "^7.1.5",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0",
+    "joi": "^17.11.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "nodemon": "^3.0.2",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "server/**/*.js",
+      "!server/index.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  }
+}
